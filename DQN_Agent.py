@@ -44,7 +44,10 @@ class DQN_Agent(Agent):
 
     def update_model(self, state, action, reward, new_state, done):
         self.replay_memory.append([state, action, reward, new_state, done])
+        self.fit_q_network()
+        self.update_target_q_network()
 
+    def fit_q_network(self):
         #sample replay and do SGD
         batch_size = 16
         if len(self.replay_memory) < batch_size:
@@ -75,6 +78,7 @@ class DQN_Agent(Agent):
         batched_targets = np.concatenate(sampled_targets,axis=0)
         self.q_network.fit(batched_states, batched_targets, epochs=1, verbose=0)
 
+    def update_target_q_network(self):
         #update target q network every C steps
         self.target_update_counter += 1
         if (self.target_update_counter > self.C):
