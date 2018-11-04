@@ -2,8 +2,9 @@ import gym
 import time
 from gym import wrappers
 from DQN_Agent import DQN_Agent
+from Random_Agent import Random_Agent
 
-env_name = "CartPole-v0"#"LunarLander-v2"#"BipedalWalker-v2"#"CartPole-v0"#"HalfCheetah-v2"#
+env_name = "CartPole-v0"#"Acrobot-v1"#"LunarLander-v2"#"BipedalWalker-v2"#"CartPole-v0"#"HalfCheetah-v2"#
 max_episodes = 500
 record_video_every = 50
 

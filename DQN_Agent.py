@@ -6,10 +6,10 @@ from collections import deque
 from keras.models import Sequential
 from keras.layers import Dense, Dropout
 from keras.optimizers import Adam
-
+from Agent import Agent
 #benchmark: this initial parameters setting can solve cartpole in ~40 episodes
 
-class DQN_Agent:
+class DQN_Agent(Agent):
     def __init__(self, env):
         self.env = env
         self.replay_memory = deque(maxlen=200000)
@@ -18,7 +18,7 @@ class DQN_Agent:
         self.epsilon = 1.0
         self.epsilon_min = 0.01
         self.epsilon_decay = 0.995
-        self.learning_rate = 0.005
+        self.learning_rate = 0.01
         self.target_update_counter = 0
         self.C = 8
 
@@ -46,11 +46,13 @@ class DQN_Agent:
         self.replay_memory.append([state, action, reward, new_state, done])
 
         #sample replay and do SGD
-        batch_size = 32
+        batch_size = 16
         if len(self.replay_memory) < batch_size:
             return
 
         samples = random.sample(self.replay_memory, batch_size)
+        sampled_states = []
+        sampled_targets = []
         for sample in samples:
             state, action, reward, new_state, done = sample
             target = self.target_q_network.predict(state)
@@ -66,8 +68,12 @@ class DQN_Agent:
                     target[0][action] = predicted[0][action] + 1
                 elif (target[0][action] > predicted[0][action]):
                     target[0][action] = predicted[0][action] - 1
+            sampled_states.append(state)
+            sampled_targets.append(target)
 
-            self.q_network.fit(state, target, epochs=1, verbose=0)
+        batched_states = np.concatenate(sampled_states,axis=0)
+        batched_targets = np.concatenate(sampled_targets,axis=0)
+        self.q_network.fit(batched_states, batched_targets, epochs=1, verbose=0)
 
         #update target q network every C steps
         self.target_update_counter += 1
