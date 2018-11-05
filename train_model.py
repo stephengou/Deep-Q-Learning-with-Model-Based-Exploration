@@ -3,10 +3,23 @@ import time
 from gym import wrappers
 from DQN_Agent import DQN_Agent
 from Random_Agent import Random_Agent
+import matplotlib.pyplot as plt
 
 env_name = "CartPole-v0"#"Acrobot-v1"#"LunarLander-v2"#"BipedalWalker-v2"#"CartPole-v0"#"HalfCheetah-v2"#
-max_episodes = 500
+max_episodes = 100
 record_video_every = 50
+
+def plot_rewards_and_length(rewards,lengths):
+    fig = plt.figure()
+    sub1 = fig.add_subplot(2,2,1)
+    sub1.set_title('reward')
+    sub1.set_xlabel('episodes')
+    sub1.plot(rewards)
+    sub2 = fig.add_subplot(2,2,2)
+    sub2.set_title('episode length')
+    sub2.set_xlabel('episodes')
+    sub2.plot(lengths)
+    plt.show()
 
 def main():
     env = gym.make(env_name)
@@ -15,6 +28,8 @@ def main():
     state_shape = (1,env.observation_space.shape[0])
     agent = DQN_Agent(env=env)
     start_time = time.time()
+    total_reward_list = []
+    episode_length_list = []
     for episode in range(max_episodes):
         cur_state = env.reset().reshape(state_shape)
         steps = 0
@@ -31,7 +46,11 @@ def main():
             if done:
                 break
 
+        total_reward_list.append(total_reward)
+        episode_length_list.append(steps)
         print('episode {} steps: {}, total reward: {},  elapsed time: {}s'.format(episode, steps, total_reward, int(time.time()-start_time)))
+
+    plot_rewards_and_length(total_reward_list, episode_length_list)
 
 if __name__ == "__main__":
     main()
