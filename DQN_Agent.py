@@ -21,17 +21,24 @@ class DQN_Agent(Agent):
         self.learning_rate = 0.01
         self.target_update_counter = 0
         self.C = 8
+        self.clip_errors = True
 
         self.q_network = self.init_q_network()
         self.target_q_network = self.init_q_network()
 
+    def get_observation_space(self):
+        return self.env.observation_space
+
+    def get_action_space(self):
+        return self.env.action_space
+
     def init_q_network(self):
         model = Sequential()
-        state_shape = self.env.observation_space.shape
+        state_shape = self.get_observation_space().shape
         model.add(Dense(24, input_shape=state_shape, activation="relu"))
         #model.add(Dense(48, activation="relu"))
         model.add(Dense(24, activation="relu"))
-        model.add(Dense(self.env.action_space.n, activation='linear'))
+        model.add(Dense(self.get_action_space().n, activation='linear'))
         model.compile(loss="mean_squared_error", optimizer=Adam(lr=self.learning_rate))
         return model
 
@@ -39,7 +46,7 @@ class DQN_Agent(Agent):
         self.epsilon *= self.epsilon_decay
         self.epsilon = max(self.epsilon_min, self.epsilon)
         if np.random.random() < self.epsilon:
-            return self.env.action_space.sample()
+            return self.get_action_space().sample()
         return np.argmax(self.q_network.predict(state)[0])
 
     def update_model(self, state, action, reward, new_state, done):
@@ -66,11 +73,12 @@ class DQN_Agent(Agent):
                 #update target by Bellman equation
                 target[0][action] = reward + self.gamma * max(self.target_q_network.predict(new_state)[0])
 
-                #clip error to -1, +1
-                if (target[0][action] > predicted[0][action]):
-                    target[0][action] = predicted[0][action] + 1
-                elif (target[0][action] > predicted[0][action]):
-                    target[0][action] = predicted[0][action] - 1
+                if self.clip_errors:
+                    #clip error to -1, +1
+                    if (target[0][action] > predicted[0][action]):
+                        target[0][action] = predicted[0][action] + 1
+                    elif (target[0][action] > predicted[0][action]):
+                        target[0][action] = predicted[0][action] - 1
             sampled_states.append(state)
             sampled_targets.append(target)
 

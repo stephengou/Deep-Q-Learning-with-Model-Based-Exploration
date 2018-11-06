@@ -3,23 +3,11 @@ import time
 from gym import wrappers
 from DQN_Agent import DQN_Agent
 from Random_Agent import Random_Agent
-import matplotlib.pyplot as plt
+from Helpers import plot_rewards_and_length
 
 env_name = "CartPole-v0"#"Acrobot-v1"#"LunarLander-v2"#"BipedalWalker-v2"#"CartPole-v0"#"HalfCheetah-v2"#
 max_episodes = 100
 record_video_every = 50
-
-def plot_rewards_and_length(rewards,lengths):
-    fig = plt.figure()
-    sub1 = fig.add_subplot(2,2,1)
-    sub1.set_title('reward')
-    sub1.set_xlabel('episodes')
-    sub1.plot(rewards)
-    sub2 = fig.add_subplot(2,2,2)
-    sub2.set_title('episode length')
-    sub2.set_xlabel('episodes')
-    sub2.plot(lengths)
-    plt.show()
 
 def main():
     env = gym.make(env_name)
