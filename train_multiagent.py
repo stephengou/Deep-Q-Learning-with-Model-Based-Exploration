@@ -4,20 +4,12 @@ from Random_Agent import Random_Agent
 import numpy as np
 from Helpers import plot_rewards_and_length,make_multi_env
 
-max_episodes = 500
+max_episodes = 100
 max_steps = 30
 render_every = 1
 
-def done_callback(agent, world):
-    total_d = 0
-    for entity in world.landmarks:
-        total_d += np.linalg.norm(entity.state.p_pos - agent.state.p_pos)
-
-    print(total_d)
-    return total_d < 3. or total_d > 200.
-
 def main():
-    env = make_multi_env('simple',False,done_cb = done_callback)
+    env = make_multi_env('simple',False)
     env.discrete_action_input = True
     #num of agents
     N = env.n
