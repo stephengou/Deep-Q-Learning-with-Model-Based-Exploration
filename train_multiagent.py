@@ -4,9 +4,9 @@ from Random_Agent import Random_Agent
 import numpy as np
 from Helpers import plot_rewards_and_length,make_multi_env
 
-max_episodes = 100
-max_steps = 30
-render_every = 1
+max_episodes = 500
+max_steps = 75
+render_every = 3
 
 def main():
     env = make_multi_env('simple',False)

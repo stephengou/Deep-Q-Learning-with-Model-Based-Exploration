@@ -6,7 +6,7 @@ from Random_Agent import Random_Agent
 from Helpers import plot_rewards_and_length
 
 env_name = "CartPole-v0"#"Acrobot-v1"#"LunarLander-v2"#"BipedalWalker-v2"#"CartPole-v0"#"HalfCheetah-v2"#
-max_episodes = 100
+max_episodes = 50
 record_video_every = 50
 
 def main():

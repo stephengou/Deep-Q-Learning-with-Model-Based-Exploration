@@ -20,7 +20,9 @@ class DQN_Agent(Agent):
         self.epsilon_decay = 0.995
         self.learning_rate = 0.01
         self.target_update_counter = 0
-        self.C = 8
+        self.C = 8 # intervcal for updating target network
+        self.initial_random_steps = 0
+        self.actions_count = 0
         self.clip_errors = True
 
         self.q_network = self.init_q_network()
@@ -43,9 +45,10 @@ class DQN_Agent(Agent):
         return model
 
     def act(self, state):
+        self.actions_count += 1
         self.epsilon *= self.epsilon_decay
         self.epsilon = max(self.epsilon_min, self.epsilon)
-        if np.random.random() < self.epsilon:
+        if np.random.random() < self.epsilon or self.actions_count < self.initial_random_steps:
             return self.get_action_space().sample()
         return np.argmax(self.q_network.predict(state)[0])
 

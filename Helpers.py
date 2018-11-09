@@ -25,4 +25,22 @@ def plot_rewards_and_length(rewards,lengths):
     sub2.set_title('episode length')
     sub2.set_xlabel('episodes')
     sub2.plot(lengths)
+
+    avg_reward = [0.] * len(rewards)
+    cumulative_rewards = [0.] * len(rewards)
+    cumulated_r = 0.
+    for i in range(len(rewards)):
+        cumulated_r += rewards[i]
+        cumulative_rewards[i] = cumulated_r
+    interval = 10
+
+    for i in range(len(rewards)):
+        if i - interval < 0:
+            avg_reward[i] = rewards[i]
+        else:
+            avg_reward[i] = (cumulative_rewards[i] - cumulative_rewards[i - interval])/interval
+    sub3 = fig.add_subplot(2,2,3)
+    sub3.set_title('average rewards')
+    sub3.set_xlabel('episodes')
+    sub3.plot(avg_reward)
     plt.show()

@@ -13,12 +13,13 @@ class Multiagent_DQN(DQN_Agent):
         DQN_Agent.__init__(self,env)
         self.gamma = 0.99
         self.epsilon = 1.0
-        self.epsilon_min = 0.01
-        self.epsilon_decay = 0.995
-        self.learning_rate = 0.01
+        self.epsilon_min = 0.05
+        self.epsilon_decay = 0.999
+        self.learning_rate = 0.02
         self.target_update_counter = 0
-        self.C = 8
+        self.C = 10
         self.clip_errors = clip_errors
+        self.initial_random_steps = 20000
 
     def get_observation_space(self):
         return self.env.observation_space[self.id]
@@ -30,6 +31,8 @@ class Multiagent_DQN(DQN_Agent):
         model = Sequential()
         state_shape = self.get_observation_space().shape
         model.add(Dense(24, input_shape=state_shape, activation="relu"))
+        #model.add(Dense(24, input_shape=state_shape, activation="relu"))
+        #model.add(Dense(24, input_shape=state_shape, activation="relu"))
         #model.add(Dense(48, activation="relu"))
         model.add(Dense(24, activation="relu"))
         model.add(Dense(self.get_action_space().n, activation='linear'))
