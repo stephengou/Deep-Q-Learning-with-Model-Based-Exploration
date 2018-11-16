@@ -1,4 +1,5 @@
 import matplotlib.pyplot as plt
+import random
 
 def make_multi_env(scenario_name, benchmark=False,done_cb=None):
     from multiagent.environment import MultiAgentEnv
@@ -15,6 +16,13 @@ def make_multi_env(scenario_name, benchmark=False,done_cb=None):
         env = MultiAgentEnv(world, scenario.reset_world, scenario.reward, scenario.observation,done_callback=done_cb)
     return env
 
+def plot_state_scatter(agent):
+    a = []
+    b = []
+    for sample in random.sample(agent.replay_memory, 2000):
+        a.append(sample[0][0][0])
+        b.append(sample[0][0][1])
+    plt.scatter(a,b)
 def plot_rewards_and_length(rewards,lengths):
     fig = plt.figure()
     sub1 = fig.add_subplot(2,2,1)

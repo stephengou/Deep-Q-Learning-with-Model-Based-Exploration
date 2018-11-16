@@ -3,10 +3,12 @@ import time
 from gym import wrappers
 from DQN_Agent import DQN_Agent
 from Random_Agent import Random_Agent
-from Helpers import plot_rewards_and_length
+from DQN_PrioritizedReplay import  DQN_PrioritizedReplay
+from DQN_Dynamics import DQN_Dynamics
+from Helpers import plot_rewards_and_length,plot_state_scatter
 
-env_name = "CartPole-v0"#"Acrobot-v1"#"LunarLander-v2"#"BipedalWalker-v2"#"CartPole-v0"#"HalfCheetah-v2"#
-max_episodes = 50
+env_name = "MountainCar-v0"#"Acrobot-v1"#"LunarLander-v2"#"BipedalWalker-v2"#"CartPole-v0"#"HalfCheetah-v2"#MountainCar-v0
+max_episodes = 40
 record_video_every = 50
 
 def main():
@@ -14,7 +16,7 @@ def main():
     env = wrappers.Monitor(env, 'replay', video_callable=lambda e: e%record_video_every == 0,force=True)
 
     state_shape = (1,env.observation_space.shape[0])
-    agent = DQN_Agent(env=env)
+    agent = DQN_Dynamics(env=env)
     start_time = time.time()
     total_reward_list = []
     episode_length_list = []
@@ -38,6 +40,7 @@ def main():
         episode_length_list.append(steps)
         print('episode {} steps: {}, total reward: {},  elapsed time: {}s'.format(episode, steps, total_reward, int(time.time()-start_time)))
 
+    plot_state_scatter(agent)
     plot_rewards_and_length(total_reward_list, episode_length_list)
 
 if __name__ == "__main__":

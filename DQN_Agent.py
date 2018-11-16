@@ -57,13 +57,16 @@ class DQN_Agent(Agent):
         self.fit_q_network()
         self.update_target_q_network()
 
+    def sample_replays(self,batch_size):
+        return random.sample(self.replay_memory, batch_size)
+
     def fit_q_network(self):
         #sample replay and do SGD
         batch_size = 16
         if len(self.replay_memory) < batch_size:
             return
 
-        samples = random.sample(self.replay_memory, batch_size)
+        samples = self.sample_replays(batch_size)
         sampled_states = []
         sampled_targets = []
         for sample in samples:

@@ -19,7 +19,7 @@ class Multiagent_DQN(DQN_Agent):
         self.target_update_counter = 0
         self.C = 10
         self.clip_errors = clip_errors
-        self.initial_random_steps = 20000
+        self.initial_random_steps = 1000
 
     def get_observation_space(self):
         return self.env.observation_space[self.id]

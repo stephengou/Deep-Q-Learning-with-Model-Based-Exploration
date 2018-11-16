@@ -4,12 +4,12 @@ from Random_Agent import Random_Agent
 import numpy as np
 from Helpers import plot_rewards_and_length,make_multi_env
 
-max_episodes = 500
-max_steps = 75
+max_episodes = 400
+max_steps = 50
 render_every = 3
 
 def main():
-    env = make_multi_env('simple',False)
+    env = make_multi_env('simple_push',False)
     env.discrete_action_input = True
     #num of agents
     N = env.n
