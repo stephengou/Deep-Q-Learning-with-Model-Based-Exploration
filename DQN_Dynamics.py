@@ -64,12 +64,12 @@ class DQN_Dynamics(DQN_Agent):
         for i in range(N-num_samples,N):
            samples.append(self.replay_memory[i][0])
 
-        best_dist = 0.
+        best_dist = -np.inf
         best_a = -1
         for action in range(self.get_action_space().n):
             next_state = self.dynamics_model.predict(np.append(state, [[action]], axis=1))
 
-            d = self.get_mean_distance(next_state,samples)
+            d = self.get_gaussian_similarity(next_state,samples)
 
             if d > best_dist:
                 best_dist = d
@@ -84,6 +84,18 @@ class DQN_Dynamics(DQN_Agent):
             d += np.linalg.norm(s - state)
         d /= num_samples
         return d
+
+    def get_gaussian_similarity(self,state, samples):
+        d = 0.
+        delta = 0.
+        sigma = 100.
+        for s in samples:
+            e = 0.
+            for j in range(len(s)):
+                e += min(max(((state[0][j] - s[0][j])**2) - delta, 0.),1.)/sigma
+            e *= -1.
+            d += e
+        return -d
 
     def get_max_distance(self,state,samples):
         return np.max([np.linalg.norm(s - state) for s in samples])

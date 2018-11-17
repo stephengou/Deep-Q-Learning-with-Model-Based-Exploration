@@ -8,7 +8,7 @@ from DQN_Dynamics import DQN_Dynamics
 from Helpers import plot_rewards_and_length,plot_state_scatter
 
 env_name = "MountainCar-v0"#"Acrobot-v1"#"LunarLander-v2"#"BipedalWalker-v2"#"CartPole-v0"#"HalfCheetah-v2"#MountainCar-v0
-max_episodes = 40
+max_episodes = 60
 record_video_every = 50
 
 def main():
