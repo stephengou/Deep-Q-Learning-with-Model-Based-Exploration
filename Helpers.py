@@ -22,7 +22,18 @@ def plot_state_scatter(agent):
     for sample in random.sample(agent.replay_memory, 2000):
         a.append(sample[0][0][0])
         b.append(sample[0][0][1])
+
     plt.scatter(a,b)
+
+    if len(sample[0][0]) <= 2:
+        return
+    c = []
+    d = []
+    for sample in random.sample(agent.replay_memory, 2000):
+        c.append(sample[0][0][2])
+        d.append(sample[0][0][3])
+    plt.scatter(c,d)
+
 def plot_rewards_and_length(rewards,lengths):
     fig = plt.figure()
     sub1 = fig.add_subplot(2,2,1)

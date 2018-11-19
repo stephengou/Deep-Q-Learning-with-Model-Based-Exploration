@@ -18,7 +18,7 @@ class DQN_Dynamics(DQN_Agent):
         self.learning_rate = 0.01
         self.target_update_counter = 0
         self.C = 8 # intervcal for updating target network
-        self.initial_random_steps = 10000
+        self.initial_random_steps = 5000
         self.actions_count = 0
         self.clip_errors = True
 
@@ -55,7 +55,7 @@ class DQN_Dynamics(DQN_Agent):
         if not self.dynamics_model_converged:
             return self.get_action_space().sample()
 
-        #return self.get_action_space().sample()
+        return self.get_action_space().sample()
 
         N = len(self.replay_memory)
         num_samples = 50
