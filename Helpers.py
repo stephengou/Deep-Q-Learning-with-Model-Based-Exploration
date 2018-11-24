@@ -17,22 +17,31 @@ def make_multi_env(scenario_name, benchmark=False,done_cb=None):
     return env
 
 def plot_state_scatter(agent):
+    fig = plt.figure()
+
     a = []
     b = []
-    for sample in random.sample(agent.replay_memory, 2000):
+    sample_size = min(2000,len(agent.replay_memory))
+    for sample in random.sample(agent.replay_memory, sample_size):
         a.append(sample[0][0][0])
         b.append(sample[0][0][1])
 
-    plt.scatter(a,b)
+    sub1 = fig.add_subplot(2,2,1)
+    sub1.set_title('state 1 2')
+    sub1.scatter(a,b,s=5)
 
     if len(sample[0][0]) <= 2:
         return
     c = []
     d = []
-    for sample in random.sample(agent.replay_memory, 2000):
+    for sample in random.sample(agent.replay_memory, sample_size):
         c.append(sample[0][0][2])
         d.append(sample[0][0][3])
-    plt.scatter(c,d)
+
+    sub2 = fig.add_subplot(2,2,2)
+    sub2.set_title('state 3 4')
+    sub2.scatter(c,d,s=5)
+
 
 def plot_rewards_and_length(rewards,lengths):
     fig = plt.figure()

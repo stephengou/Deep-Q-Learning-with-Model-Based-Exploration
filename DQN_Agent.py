@@ -28,6 +28,12 @@ class DQN_Agent(Agent):
         self.q_network = self.init_q_network()
         self.target_q_network = self.init_q_network()
 
+    def on_episode_start(self):
+        pass
+
+    def on_episode_end(self):
+        pass
+
     def get_observation_space(self):
         return self.env.observation_space
 

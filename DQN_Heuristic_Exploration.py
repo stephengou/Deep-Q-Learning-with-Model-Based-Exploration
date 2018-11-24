@@ -5,20 +5,21 @@ from keras.models import Sequential
 from keras.layers import Dense, Dropout
 from keras.optimizers import Adam
 from DQN_Agent import DQN_Agent
+from scipy import stats
 
-class DQN_Least_Likely_Action(DQN_Agent):
+class DQN_Heuristic_Exploration(DQN_Agent):
     def __init__(self, env):
         self.env = env
         self.replay_memory = deque(maxlen=200000)
 
         self.gamma = 0.99
         self.epsilon = 1.0
-        self.epsilon_min = 0.05
-        self.epsilon_decay = 0.995
+        self.epsilon_min = 0.01
+        self.epsilon_decay = 0.9995
         self.learning_rate = 0.05
         self.target_update_counter = 0
         self.C = 8 # intervcal for updating target network
-        self.initial_random_steps = 0
+        self.initial_random_steps = 500000
         self.actions_count = 0
         self.clip_errors = True
 
@@ -35,10 +36,7 @@ class DQN_Least_Likely_Action(DQN_Agent):
         self.update_target_q_network()
         self.update_count += 1
 
-        if self.dynamics_model_converged:
-            return
-
-        if self.update_count % 50 == 0:
+        if self.update_count % 25 == 0:
             self.fit_dynamics_model()
         if self.update_count % 500 == 0:
             self.eval_dynamics_model()
@@ -52,29 +50,48 @@ class DQN_Least_Likely_Action(DQN_Agent):
         return np.argmax(self.q_network.predict(state)[0])
 
     def explore(self,state):
-        return self.get_action_space().sample()
+        if not self.dynamics_model_converged:
+            return self.get_action_space().sample()
+        #return self.get_action_space().sample()
+        N = len(self.replay_memory)
+        num_samples = 50
+        samples = []
+        #samples = random.sample(self.replay_memory,num_samples)
+        for i in range(N-num_samples,N):
+           samples.append(self.replay_memory[i][0])
 
-        action_probs = self.dynamics_model.predict(state)[0]
+        least_p = np.inf
+        best_a = -1
+        for action in range(self.get_action_space().n):
+            next_state = self.dynamics_model.predict(np.append(state, [[action]], axis=1))
+            p = self.get_probability(next_state, samples)
+            if p < least_p:
+                best_a = action
+                least_p = p
+        return best_a
 
-        inverse_probs = 1. - action_probs
-        inverse_probs /= np.sum(inverse_probs)
-
-        actions = np.arange(self.get_action_space().n).tolist()
-        return np.random.choice(actions, p = inverse_probs)
-        #return np.argmax(inverse_probs)
+    def get_probability(self,state, samples):
+        design = []
+        for s in samples:
+            design.append(s[0])
+        design = np.stack(design).T
+        cov = np.cov(design)
+        mean = np.mean(design,axis = 1)
+        p = stats.multivariate_normal.pdf(state[0],mean,cov)
+        return p
 
     def init_dynamics_model(self):
         model = Sequential()
-        state_shape = (self.get_observation_space().shape[0],)
+        state_shape = (self.get_observation_space().shape[0] + 1,)
         print(state_shape)
-        model.add(Dense(24, input_shape=state_shape, activation="relu",kernel_initializer='random_uniform',bias_initializer='zeros'))
+        model.add(Dense(24, input_shape=state_shape, activation="relu"))
         model.add(Dense(24, activation="relu"))
-        model.add(Dense(self.get_action_space().n, activation='softmax'))
-        model.compile(loss="categorical_crossentropy", optimizer=Adam(lr=self.learning_rate))
+        model.add(Dense(self.get_observation_space().shape[0], activation='linear'))
+        model.compile(loss="mean_squared_error", optimizer=Adam(lr=self.learning_rate))
         return model
 
     def fit_dynamics_model(self):
-        batchsize = 128
+        batchsize = 64
         if len(self.replay_memory) < batchsize:
             return
         samples = self.sample_replays(batchsize)
@@ -82,10 +99,10 @@ class DQN_Least_Likely_Action(DQN_Agent):
         sampled_targets = []
         for sample in samples:
             state, action, reward, new_state, done = sample
-            target = [0] * self.get_action_space().n
-            target[action] = 1
-            sampled_states.append(state)
-            sampled_targets.append([target])
+            input_state = np.append(state, [[action]], axis=1)
+            target = new_state
+            sampled_states.append(input_state)
+            sampled_targets.append(target)
 
         batched_inputs = np.concatenate(sampled_states, axis=0)
         batched_targets = np.concatenate(sampled_targets, axis=0)
@@ -98,16 +115,15 @@ class DQN_Least_Likely_Action(DQN_Agent):
         sampled_targets = []
         for sample in samples:
             state, action, reward, new_state, done = sample
-            target = [0] * self.get_action_space().n
-            target[action] = 1
-            sampled_states.append(state)
-            sampled_targets.append([target])
+            input_state = np.append(state, [[action]], axis=1)
+            target = new_state
+            sampled_states.append(input_state)
+            sampled_targets.append(target)
 
         batched_inputs = np.concatenate(sampled_states, axis=0)
         batched_targets = np.concatenate(sampled_targets, axis=0)
         scores = self.dynamics_model.evaluate(batched_inputs,batched_targets,verbose=0)
-        if scores < 0.0001:
+        if scores < 0.005:
             self.dynamics_model_converged = True
             print('Dynamics model has converged!')
-            print(self.dynamics_model.predict([sampled_states[0]]))
         print(self.dynamics_model.metrics_names, scores)
