@@ -1,3 +1,8 @@
+"""
+Modified based on
+https://gist.github.com/simoninithomas/7a3357966eaebd58dddb6166c9135930#file-cartpole-reinforce-monte-carlo-policy-gradients-ipynb
+"""
+
 from Agent import Agent
 
 import tensorflow as tf
@@ -15,11 +20,11 @@ class PG_MonteCarlo(Agent):
         self.action_size = self.env.action_space.n
 
         # TRAINING Hyperparameters
-        self.max_episodes = 10000
+        self.max_episodes = 1000
         self.learning_rate = 0.01
-        self.gamma = 0.95  # Discount rate
+        self.gamma = 0.96  # Discount rate
 
-        self.path_to_board = "/tensorboard/pg/1"
+        self.path_to_board = "/tensorboard/pg/mc"
 
     def discount_and_normalize_rewards(self, episode_rewards):
         discounted_episode_rewards = np.zeros_like(episode_rewards)
@@ -45,7 +50,7 @@ class PG_MonteCarlo(Agent):
 
             with tf.name_scope("fc1"):
                 fc1 = tf.contrib.layers.fully_connected(inputs=self.input_,
-                                                        num_outputs=10,
+                                                        num_outputs=8,
                                                         activation_fn=tf.nn.relu,
                                                         weights_initializer=tf.contrib.layers.xavier_initializer())
 
