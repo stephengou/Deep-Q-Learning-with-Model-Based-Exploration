@@ -17,7 +17,7 @@ class DQN_Agent(Agent):
         self.gamma = 0.99
         self.epsilon = 1.0
         self.epsilon_min = 0.01
-        self.epsilon_decay = 0.995
+        self.epsilon_decay = 0.9995
         self.learning_rate = 0.01
         self.target_update_counter = 0
         self.C = 8 # intervcal for updating target network

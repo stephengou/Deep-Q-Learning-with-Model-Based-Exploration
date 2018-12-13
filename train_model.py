@@ -3,16 +3,12 @@ import time
 from gym import wrappers
 from DQN_Agent import DQN_Agent
 from Random_Agent import Random_Agent
-from DQN_Dynamics import DQN_Dynamics
-from DQN_Least_Likely_Action import  DQN_Least_Likely_Action
-from DQN_Dynamics_Normal import DQN_Dynamics_Normal
-from DQN_Heuristic_Exploration import DQN_Heuristic_Exploration
-from DQN_Mem_Gen import  DQN_Mem_Gen
+from DQN_Guided_Exploration import DQN_Heuristic_Exploration
 from Helpers import plot_rewards_and_length,plot_state_scatter
 import numpy as np
 
 env_name = "MountainCar-v0"#"Acrobot-v1"#"LunarLander-v2"#"BipedalWalker-v2"#"CartPole-v0"#"HalfCheetah-v2"#MountainCar-v0
-max_episodes = 50
+max_episodes = 200
 record_video_every = 100
 
 def main():
@@ -47,8 +43,8 @@ def main():
         episode_length_list.append(steps)
         print('episode {} steps: {}, total reward: {},  elapsed time: {}s'.format(episode, steps, total_reward, int(time.time()-start_time)))
 
-    plot_state_scatter(agent)
-    plot_rewards_and_length(total_reward_list, episode_length_list)
+    plot_state_scatter(agent,title1='Mountain Car',title2='',xlabel1='position',ylabel1='velocity',xlabel2='',ylabel2='',color= '#00b359')
+    plot_rewards_and_length(total_reward_list, -200.,0., episode_length_list)
 
 if __name__ == "__main__":
     main()

@@ -1,4 +1,5 @@
 import matplotlib.pyplot as plt
+import matplotlib.ticker as ticker
 import random
 
 def make_multi_env(scenario_name, benchmark=False,done_cb=None):
@@ -16,7 +17,7 @@ def make_multi_env(scenario_name, benchmark=False,done_cb=None):
         env = MultiAgentEnv(world, scenario.reset_world, scenario.reward, scenario.observation,done_callback=done_cb)
     return env
 
-def plot_state_scatter(agent):
+def plot_state_scatter(agent,title1,title2,xlabel1,ylabel1,xlabel2,ylabel2,color, lim1 = [-0.1,0.1,-1.4,0.6],lim2=[0.0,0.0,0.0,0.0]):
     fig = plt.figure()
 
     a = []
@@ -27,8 +28,15 @@ def plot_state_scatter(agent):
         b.append(sample[0][0][1])
 
     sub1 = fig.add_subplot(2,2,1)
-    sub1.set_title('state 1 2')
-    sub1.scatter(a,b,s=5)
+    sub1.grid(True,linewidth='0.4',color='white')
+    sub1.set_xlabel(xlabel1)
+    sub1.set_ylabel(ylabel1)
+    sub1.set_ylim(bottom=lim1[0],top = lim1[1])
+    sub1.yaxis.set_major_locator(ticker.MultipleLocator(0.02))
+    sub1.set_xlim(left=lim1[2],right=lim1[3])
+    sub1.xaxis.set_major_locator(ticker.MultipleLocator(0.25))
+    sub1.set_facecolor('#e6f3ff')
+    sub1.scatter(a,b,s=5,color = color)
 
     if len(sample[0][0]) <= 2:
         return
@@ -39,20 +47,29 @@ def plot_state_scatter(agent):
         d.append(sample[0][0][3])
 
     sub2 = fig.add_subplot(2,2,2)
-    sub2.set_title('state 3 4')
-    sub2.scatter(c,d,s=5)
+    sub2.set_ylim(bottom=lim2[0],top = lim2[1])
+    sub2.set_xlim(left=lim2[2],right=lim2[3])
+    sub2.set_xlabel(xlabel2)
+    sub2.set_ylabel(ylabel2)
+    sub2.scatter(c,d,s=5,color = color)
 
 
-def plot_rewards_and_length(rewards,lengths):
+def plot_rewards_and_length(rewards, min_reward,max_reward, lengths):
     fig = plt.figure()
     sub1 = fig.add_subplot(2,2,1)
-    sub1.set_title('reward')
+    sub1.set_title('Reward')
+    sub1.set_ylim(bottom=min_reward,top=max_reward)
     sub1.set_xlabel('episodes')
+    sub1.set_ylabel('reward')
     sub1.plot(rewards)
+
+    '''
     sub2 = fig.add_subplot(2,2,2)
     sub2.set_title('episode length')
     sub2.set_xlabel('episodes')
     sub2.plot(lengths)
+    '''
+
 
     avg_reward = [0.] * len(rewards)
     cumulative_rewards = [0.] * len(rewards)
@@ -60,14 +77,15 @@ def plot_rewards_and_length(rewards,lengths):
     for i in range(len(rewards)):
         cumulated_r += rewards[i]
         cumulative_rewards[i] = cumulated_r
-    interval = 10
+    #interval = 10
 
     for i in range(len(rewards)):
-        if i - interval < 0:
+        if i <= 0:
             avg_reward[i] = rewards[i]
         else:
-            avg_reward[i] = (cumulative_rewards[i] - cumulative_rewards[i - interval])/interval
-    sub3 = fig.add_subplot(2,2,3)
+            avg_reward[i] = (cumulative_rewards[i] - cumulative_rewards[0])/i
+    sub3 = fig.add_subplot(2,2,2)
+    sub3.set_ylim(bottom=min_reward,top=max_reward)
     sub3.set_title('average rewards')
     sub3.set_xlabel('episodes')
     sub3.plot(avg_reward)
