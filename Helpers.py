@@ -1,6 +1,7 @@
 import matplotlib.pyplot as plt
 import matplotlib.ticker as ticker
 import random
+import pandas as pd
 
 def make_multi_env(scenario_name, benchmark=False,done_cb=None):
     from multiagent.environment import MultiAgentEnv
@@ -17,7 +18,7 @@ def make_multi_env(scenario_name, benchmark=False,done_cb=None):
         env = MultiAgentEnv(world, scenario.reset_world, scenario.reward, scenario.observation,done_callback=done_cb)
     return env
 
-def plot_state_scatter(agent,title1,title2,xlabel1,ylabel1,xlabel2,ylabel2,color, lim1 = [-0.1,0.1,-1.4,0.6],lim2=[0.0,0.0,0.0,0.0]):
+def plot_state_scatter(agent,title1,title2,xlabel1,ylabel1,xlabel2,ylabel2,color, lim1 = [-0.1,0.1,-1.4,0.6],lim2=[-2.0,1.0,-2.0,2.0]):
     fig = plt.figure()
 
     a = []
@@ -36,7 +37,7 @@ def plot_state_scatter(agent,title1,title2,xlabel1,ylabel1,xlabel2,ylabel2,color
     sub1.set_xlim(left=lim1[2],right=lim1[3])
     sub1.xaxis.set_major_locator(ticker.MultipleLocator(0.25))
     sub1.set_facecolor('#e6f3ff')
-    sub1.scatter(a,b,s=5,color = color)
+    sub1.scatter(a,b,s=3,color = color)
 
     if len(sample[0][0]) <= 2:
         return
@@ -47,14 +48,22 @@ def plot_state_scatter(agent,title1,title2,xlabel1,ylabel1,xlabel2,ylabel2,color
         d.append(sample[0][0][3])
 
     sub2 = fig.add_subplot(2,2,2)
-    sub2.set_ylim(bottom=lim2[0],top = lim2[1])
-    sub2.set_xlim(left=lim2[2],right=lim2[3])
+    sub2.grid(True,linewidth='0.4',color='white')
     sub2.set_xlabel(xlabel2)
     sub2.set_ylabel(ylabel2)
-    sub2.scatter(c,d,s=5,color = color)
+    sub2.set_ylim(bottom=lim2[0],top = lim2[1])
+    sub2.yaxis.set_major_locator(ticker.MultipleLocator(0.5))
+    sub2.set_xlim(left=lim2[2],right=lim2[3])
+    sub2.xaxis.set_major_locator(ticker.MultipleLocator(0.5))
+    sub2.set_facecolor('#e6f3ff')
+    sub2.scatter(c,d,s=3,color = color)
 
 
 def plot_rewards_and_length(rewards, min_reward,max_reward, lengths):
+
+    rewards_df = pd.DataFrame(rewards)
+    rewards_df.to_csv('Data/rewards.csv')
+
     fig = plt.figure()
     sub1 = fig.add_subplot(2,2,1)
     sub1.set_title('Reward')
@@ -90,3 +99,6 @@ def plot_rewards_and_length(rewards, min_reward,max_reward, lengths):
     sub3.set_xlabel('episodes')
     sub3.plot(avg_reward)
     plt.show()
+
+
+

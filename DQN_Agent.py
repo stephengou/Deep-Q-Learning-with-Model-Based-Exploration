@@ -18,7 +18,7 @@ class DQN_Agent(Agent):
         self.epsilon = 1.0
         self.epsilon_min = 0.01
         self.epsilon_decay = 0.9995
-        self.learning_rate = 0.01
+        self.learning_rate = 0.05
         self.target_update_counter = 0
         self.C = 8 # intervcal for updating target network
         self.initial_random_steps = 0
@@ -43,9 +43,9 @@ class DQN_Agent(Agent):
     def init_q_network(self):
         model = Sequential()
         state_shape = self.get_observation_space().shape
-        model.add(Dense(24, input_shape=state_shape, activation="relu"))
+        model.add(Dense(48, input_shape=state_shape, activation="relu"))
         #model.add(Dense(48, activation="relu"))
-        model.add(Dense(24, activation="relu"))
+        #model.add(Dense(24, activation="relu"))
         model.add(Dense(self.get_action_space().n, activation='linear'))
         model.compile(loss="mean_squared_error", optimizer=Adam(lr=self.learning_rate))
         return model
