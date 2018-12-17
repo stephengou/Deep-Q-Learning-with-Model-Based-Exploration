@@ -7,14 +7,18 @@ https://github.com/MorvanZhou/Reinforcement-learning-with-tensorflow/blob/master
 import numpy as np
 import tensorflow as tf
 import gym
+import matplotlib.pyplot as plt
+import pandas as pd
+import sys
 
 np.random.seed(2)
 tf.set_random_seed(2)  # reproducible
 
 # Superparameters
 OUTPUT_GRAPH = False
-MAX_EPISODE = 3000
-DISPLAY_REWARD_THRESHOLD = 200  # renders environment if total episode reward is greater then this threshold
+MAX_EPISODE = 10
+DISPLAY_REWARD_THRESHOLD = 100
+# DISPLAY_REWARD_THRESHOLD = 200  # renders environment if total episode reward is greater then this threshold
 MAX_EP_STEPS = 1000   # maximum time step in one episode
 RENDER = False  # rendering wastes time
 GAMMA = 0.9     # reward discount in TD error
@@ -22,9 +26,10 @@ LR_A = 0.001    # learning rate for actor
 LR_C = 0.01     # learning rate for critic
 
 # env = gym.make('MountainCar-v0')
-env = gym.make('CartPole-v0')
+# env = gym.make('CartPole-v0')
+env = gym.make('LunarLander-v2')
 env.seed(1)  # reproducible
-env = env.unwrapped
+# env = env.unwrapped
 
 N_F = env.observation_space.shape[0]
 N_A = env.action_space.n
@@ -41,15 +46,24 @@ class Actor(object):
         with tf.variable_scope('Actor'):
             l1 = tf.layers.dense(
                 inputs=self.s,
-                units=20,    # number of hidden units
+                units=10,    # number of hidden units
                 activation=tf.nn.relu,
                 kernel_initializer=tf.random_normal_initializer(0., .1),    # weights
                 bias_initializer=tf.constant_initializer(0.1),  # biases
                 name='l1'
             )
 
-            self.acts_prob = tf.layers.dense(
+            l2 = tf.layers.dense(
                 inputs=l1,
+                units=10,  # number of hidden units
+                activation=tf.nn.relu,
+                kernel_initializer=tf.random_normal_initializer(0., .1),  # weights
+                bias_initializer=tf.constant_initializer(0.1),  # biases
+                name='l2'
+            )
+
+            self.acts_prob = tf.layers.dense(
+                inputs=l2,
                 units=n_actions,    # output units
                 activation=tf.nn.softmax,   # get action probabilities
                 kernel_initializer=tf.random_normal_initializer(0., .1),  # weights
@@ -87,7 +101,7 @@ class Critic(object):
         with tf.variable_scope('Critic'):
             l1 = tf.layers.dense(
                 inputs=self.s,
-                units=20,  # number of hidden units
+                units=10,  # number of hidden units
                 activation=tf.nn.relu,  # None
                 # have to be linear to make sure the convergence of actor.
                 # But linear approximator seems hardly learns the correct Q.
@@ -96,8 +110,19 @@ class Critic(object):
                 name='l1'
             )
 
-            self.v = tf.layers.dense(
+            l2 = tf.layers.dense(
                 inputs=l1,
+                units=10,  # number of hidden units
+                activation=tf.nn.relu,  # None
+                # have to be linear to make sure the convergence of actor.
+                # But linear approximator seems hardly learns the correct Q.
+                kernel_initializer=tf.random_normal_initializer(0., .1),  # weights
+                bias_initializer=tf.constant_initializer(0.1),  # biases
+                name='l2'
+            )
+
+            self.v = tf.layers.dense(
+                inputs=l2,
                 units=1,  # output units
                 activation=None,
                 kernel_initializer=tf.random_normal_initializer(0., .1),  # weights
@@ -130,6 +155,9 @@ sess.run(tf.global_variables_initializer())
 if OUTPUT_GRAPH:
     tf.summary.FileWriter("logs/", sess.graph)
 
+all_ep_r = []
+all_ep_rs = []
+
 for i_episode in range(MAX_EPISODE):
     s = env.reset()
     t = 0
@@ -153,6 +181,7 @@ for i_episode in range(MAX_EPISODE):
 
         if done or t >= MAX_EP_STEPS:
             ep_rs_sum = sum(track_r)
+            all_ep_rs.append(ep_rs_sum)
 
             if 'running_reward' not in globals():
                 running_reward = ep_rs_sum
@@ -160,4 +189,11 @@ for i_episode in range(MAX_EPISODE):
                 running_reward = running_reward * 0.95 + ep_rs_sum * 0.05
             if running_reward > DISPLAY_REWARD_THRESHOLD: RENDER = True  # rendering
             print("episode:", i_episode, "  reward:", int(running_reward))
+            all_ep_r.append(running_reward)
             break
+
+plt.plot(np.arange(len(all_ep_r)), all_ep_r)
+plt.xlabel('Episode');plt.ylabel('Moving averaged episode reward');plt.show()
+
+df = pd.DataFrame(all_ep_rs)
+df.to_csv('{}_{}_all_ep_rs.csv'.format(sys.argv[0].split('.')[0], pd.datetime.today().strftime('%Y%m%d-%H%M%S')), header=None)
