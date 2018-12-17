@@ -1,9 +1,3 @@
-"""
-Derivied based on:
-https://github.com/MorvanZhou/Reinforcement-learning-with-tensorflow/blob/master/contents/8_Actor_Critic_Advantage/AC_CartPole.py
-
-"""
-
 import numpy as np
 import tensorflow as tf
 import gym
