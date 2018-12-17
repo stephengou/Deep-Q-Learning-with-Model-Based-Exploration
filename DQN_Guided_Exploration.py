@@ -12,6 +12,25 @@ class DQN_Heuristic_Exploration(DQN_Agent):
         self.env = env
         self.replay_memory = deque(maxlen=200000)
 
+        #Mountain Car
+        #explore sample = 50
+        #qnetwork = 1 hiddenlayer 48 units
+        #convergence cutoff 0.0003
+        #dynamics network lr = 0.02
+        #dynamics network batchsize =64
+        #scatter plot 2000 sample
+        self.gamma = 0.99
+        self.epsilon = 1.0
+        self.epsilon_min = 0.01
+        self.epsilon_decay = 0.9995
+        self.learning_rate = 0.05
+        self.target_update_counter = 0
+        self.C = 8 # intervcal for updating target network
+        self.initial_random_steps = 10000
+        self.actions_count = 0
+        self.clip_errors = True
+
+        '''#Lunar
         self.gamma = 0.99
         self.epsilon = 1.0
         self.epsilon_min = 0.01
@@ -21,7 +40,7 @@ class DQN_Heuristic_Exploration(DQN_Agent):
         self.C = 8 # intervcal for updating target network
         self.initial_random_steps = 5000
         self.actions_count = 0
-        self.clip_errors = True
+        self.clip_errors = True'''
 
         self.q_network = self.init_q_network()
         self.target_q_network = self.init_q_network()
@@ -56,7 +75,6 @@ class DQN_Heuristic_Exploration(DQN_Agent):
         N = len(self.replay_memory)
         num_samples = 50
         samples = []
-        #samples = random.sample(self.replay_memory,num_samples)
         for i in range(N-num_samples,N):
            samples.append(self.replay_memory[i][0])
 
@@ -87,7 +105,7 @@ class DQN_Heuristic_Exploration(DQN_Agent):
         model.add(Dense(24, input_shape=state_shape, activation="relu"))
         model.add(Dense(24, activation="relu"))
         model.add(Dense(self.get_observation_space().shape[0], activation='linear'))
-        model.compile(loss="mean_squared_error", optimizer=Adam(lr=self.learning_rate))
+        model.compile(loss="mean_squared_error", optimizer=Adam(lr=0.02))
         return model
 
     def fit_dynamics_model(self):
