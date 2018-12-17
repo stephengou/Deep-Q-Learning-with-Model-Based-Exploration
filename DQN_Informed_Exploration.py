@@ -5,20 +5,12 @@ from keras.models import Sequential
 from keras.layers import Dense, Dropout
 from keras.optimizers import Adam
 from DQN_Agent import DQN_Agent
-from scipy import stats
 
-class DQN_Guided_Exploration(DQN_Agent):
+class DQN_Informed_Exploration(DQN_Agent):
     def __init__(self, env):
         self.env = env
         self.replay_memory = deque(maxlen=200000)
 
-        #Mountain Car
-        #explore sample = 50
-        #qnetwork = 1 hiddenlayer 48 units
-        #convergence cutoff 0.0003
-        #dynamics network lr = 0.02
-        #dynamics network batchsize =64
-        #scatter plot 2000 sample
         self.gamma = 0.99
         self.epsilon = 1.0
         self.epsilon_min = 0.01
@@ -26,21 +18,9 @@ class DQN_Guided_Exploration(DQN_Agent):
         self.learning_rate = 0.05
         self.target_update_counter = 0
         self.C = 8 # intervcal for updating target network
-        self.initial_random_steps = 10000
+        self.initial_random_steps = 100000
         self.actions_count = 0
         self.clip_errors = True
-
-        '''#Lunar
-        self.gamma = 0.99
-        self.epsilon = 1.0
-        self.epsilon_min = 0.01
-        self.epsilon_decay = 0.9995
-        self.learning_rate = 0.05
-        self.target_update_counter = 0
-        self.C = 8 # intervcal for updating target network
-        self.initial_random_steps = 5000
-        self.actions_count = 0
-        self.clip_errors = True'''
 
         self.q_network = self.init_q_network()
         self.target_q_network = self.init_q_network()
@@ -71,32 +51,49 @@ class DQN_Guided_Exploration(DQN_Agent):
     def explore(self,state):
         if not self.dynamics_model_converged:
             return self.get_action_space().sample()
-        #return self.get_action_space().sample()
+
         N = len(self.replay_memory)
         num_samples = 50
         samples = []
+        #samples = random.sample(self.replay_memory,num_samples)
         for i in range(N-num_samples,N):
            samples.append(self.replay_memory[i][0])
 
-        least_p = np.inf
+        best_dist = -np.inf
         best_a = -1
         for action in range(self.get_action_space().n):
             next_state = self.dynamics_model.predict(np.append(state, [[action]], axis=1))
-            p = self.get_probability(next_state, samples)
-            if p < least_p:
+
+            d = self.get_gaussian_similarity(next_state,samples)
+
+            if d > best_dist:
+                best_dist = d
                 best_a = action
-                least_p = p
+
         return best_a
 
-    def get_probability(self,state, samples):
-        design = []
+    def get_mean_distance(self,state, samples):
+        num_samples = len(samples)
+        d = 0.
         for s in samples:
-            design.append(s[0])
-        design = np.stack(design).T
-        cov = np.cov(design)
-        mean = np.mean(design,axis = 1)
-        p = stats.multivariate_normal.pdf(state[0],mean,cov)
-        return p
+            d += np.linalg.norm(s - state)
+        d /= num_samples
+        return d
+
+    def get_gaussian_similarity(self,state, samples):
+        d = 0.
+        delta = 0.
+        sigma = 100.
+        for s in samples:
+            e = 0.
+            for j in range(len(s)):
+                e += min(max(((state[0][j] - s[0][j])**2) - delta, 0.),1.)/sigma
+            e *= -1.
+            d += e
+        return -d
+
+    def get_max_distance(self,state,samples):
+        return np.max([np.linalg.norm(s - state) for s in samples])
 
     def init_dynamics_model(self):
         model = Sequential()
@@ -105,7 +102,7 @@ class DQN_Guided_Exploration(DQN_Agent):
         model.add(Dense(24, input_shape=state_shape, activation="relu"))
         model.add(Dense(24, activation="relu"))
         model.add(Dense(self.get_observation_space().shape[0], activation='linear'))
-        model.compile(loss="mean_squared_error", optimizer=Adam(lr=0.02))
+        model.compile(loss="mean_squared_error", optimizer=Adam(lr=self.learning_rate))
         return model
 
     def fit_dynamics_model(self):

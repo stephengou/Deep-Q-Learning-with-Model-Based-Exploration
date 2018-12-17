@@ -3,12 +3,13 @@ import time
 from gym import wrappers
 from DQN_Agent import DQN_Agent
 from Random_Agent import Random_Agent
-from DQN_Guided_Exploration import DQN_Heuristic_Exploration
+from DQN_Guided_Exploration import DQN_Guided_Exploration
+from DQN_Informed_Exploration import  DQN_Informed_Exploration
 from Helpers import plot_rewards_and_length,plot_state_scatter
 import numpy as np
 
 env_name = "MountainCar-v0"#"Acrobot-v1"#"LunarLander-v2"#"BipedalWalker-v2"#"CartPole-v0"#"HalfCheetah-v2"#MountainCar-v0
-max_episodes = 100
+max_episodes = 200
 record_video_every = 100
 
 def main():
@@ -17,7 +18,7 @@ def main():
     env = wrappers.Monitor(env, 'replay', video_callable=lambda e: e%record_video_every == 0,force=True)
 
     state_shape = (1,env.observation_space.shape[0])
-    agent = DQN_Heuristic_Exploration(env=env)
+    agent = DQN_Guided_Exploration(env=env)
     start_time = time.time()
     total_reward_list = []
     episode_length_list = []
@@ -43,7 +44,7 @@ def main():
         episode_length_list.append(steps)
         print('episode {} steps: {}, total reward: {},  elapsed time: {}s'.format(episode, steps, total_reward, int(time.time()-start_time)))
 
-    plot_state_scatter(agent,title1='Mountain Car',title2='',xlabel1='x-position',ylabel1='y-position',xlabel2='x-velocity',ylabel2='y-velocity',color= '#6666ff')
+    plot_state_scatter(agent,title1='Mountain Car',title2='',xlabel1='position',ylabel1='velocity',xlabel2='x-velocity',ylabel2='y-velocity',color= '#6666ff')
     plot_rewards_and_length(total_reward_list, -200.,0., episode_length_list)
 
 if __name__ == "__main__":
