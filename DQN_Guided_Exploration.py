@@ -141,7 +141,7 @@ class DQN_Guided_Exploration(DQN_Agent):
         batched_inputs = np.concatenate(sampled_states, axis=0)
         batched_targets = np.concatenate(sampled_targets, axis=0)
         scores = self.dynamics_model.evaluate(batched_inputs,batched_targets,verbose=0)
-        if scores < 0.0003:
+        if scores < 0.005:
             self.dynamics_model_converged = True
             print('Dynamics model has converged!')
         print(self.dynamics_model.metrics_names, scores)

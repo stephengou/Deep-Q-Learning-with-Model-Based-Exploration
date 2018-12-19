@@ -1,5 +1,5 @@
 #reference: https://keon.io/deep-q-learning/
-# this dqn is used as a baseline and basic model for our independent multiagent DQN
+# this dqn is used as a baseline and starter code for our improved DQN
 import numpy as np
 import random
 from collections import deque
@@ -7,7 +7,6 @@ from keras.models import Sequential
 from keras.layers import Dense, Dropout
 from keras.optimizers import Adam
 from Agent import Agent
-#benchmark: this initial parameters setting can solve cartpole in ~40 episodes
 
 class DQN_Agent(Agent):
     def __init__(self, env):

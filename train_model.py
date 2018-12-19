@@ -2,14 +2,12 @@ import gym
 import time
 from gym import wrappers
 from DQN_Agent import DQN_Agent
-from Random_Agent import Random_Agent
 from DQN_Guided_Exploration import DQN_Guided_Exploration
-from DQN_Informed_Exploration import  DQN_Informed_Exploration
 from Helpers import plot_rewards_and_length,plot_state_scatter
 import numpy as np
 
 env_name = "MountainCar-v0"#"Acrobot-v1"#"LunarLander-v2"#"BipedalWalker-v2"#"CartPole-v0"#"HalfCheetah-v2"#MountainCar-v0
-max_episodes = 200
+max_episodes = 55
 record_video_every = 100
 
 def main():
