@@ -1,4 +1,4 @@
-# MultiAgent-Deep-Q-Network
+# DQN with Model-Based Exploration
 We proposed Deep Q-Networks (DQN) with model-based exploration, an algorithm
 combining both model-free and model-based approaches that
 explores better and learns environments with sparse rewards more efficiently.
